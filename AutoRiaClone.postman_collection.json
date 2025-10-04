@@ -1,0 +1,1502 @@
+{
+  "info": {
+    "_postman_id": "30473ad0-b0b8-4648-a136-1444fd2e1489",
+    "name": "AutoRiaClone.postman_collection.json",
+    "description": "Collection completa per AutoRiaClone con autenticazione automatica via Postman",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40434819"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.environment.set('token', json.access_token);",
+                  "}",
+                  "",
+                  "",
+                  "pm.test(\"Response status code is 201\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(201);",
+                  "});",
+                  "",
+                  "",
+                  "pm.test(\"Response has the required fields\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData).to.be.an('object');",
+                  "    pm.expect(responseData).to.have.all.keys('access_token', 'user');",
+                  "    pm.expect(responseData.user).to.be.an('object').and.to.have.all.keys('id', 'email', 'firstName', 'lastName', 'accountType', 'roles');",
+                  "});",
+                  "",
+                  "",
+                  "pm.test(\"Validate the user object contains the expected fields\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData).to.be.an('object');",
+                  "    pm.expect(responseData.user).to.exist;",
+                  "    ",
+                  "    const userProperties = ['id', 'email', 'firstName', 'lastName', 'accountType', 'roles'];",
+                  "    ",
+                  "    userProperties.forEach(function(property) {",
+                  "        pm.expect(responseData.user).to.have.property(property);",
+                  "    });",
+                  "});",
+                  "",
+                  "",
+                  "pm.test(\"Access token is a non-empty string\", function () {",
+                  "    const responseData = pm.response.json();",
+                  "    ",
+                  "    pm.expect(responseData).to.be.an('object');",
+                  "    pm.expect(responseData.access_token).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Access token should not be empty\");",
+                  "});",
+                  "",
+                  "",
+                  "pm.test(\"Response time is less than 200ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": " {{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"email\": \"lisst@example.com\",\r\n  \"password\": \"GuriRos567!\"\r\n}\r\n\r\n"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"lisst@example.com\",\r\n  \"password\": \"GuriRos567!\",\r\n  \"firstName\": \"Denis\",\r\n  \"lastName\": \"Kelpis\"\r\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.unset(\"token\");\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": " {{access_token}}\n",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Access Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{refresh_token}}",
+                "description": "Inserire il refresh token ottenuto dal login",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Endpoint per ottenere un nuovo access token usando il refresh token."
+          },
+          "response": [
+            {
+              "name": "Success 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"access_token\": \"nuovo-access-token\"\n}"
+            },
+            {
+              "name": "Unauthorized 401",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": ""
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Invalid refresh token\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Mario\",\n  \"lastName\": \"Rossi\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=10&sort=id&order=ASC&search=&role=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id"
+                },
+                {
+                  "key": "order",
+                  "value": "ASC"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "role",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User by ID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Denisa\",\n  \"lastName\": \"Kelpis\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upgrade User to Premium",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/28ec1fb1-0797-40ed-9678-77034cc216ac/premium",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "users",
+                "28ec1fb1-0797-40ed-9678-77034cc216ac",
+                "premium"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Users - Add Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"seller\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/users/{{userId}}/roles",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "users",
+                "{{userId}}",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Users - Remove Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwtToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/users/{{userId}}/roles/seller",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "users",
+                "{{userId}}",
+                "roles",
+                "seller"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload User Avatar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman-cloud:///1f07cec4-25d9-4240-85c5-47417115b04d"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "avatar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User Avatar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/avatar/delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "avatar",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "FileStorage",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "",
+                    "/C:/Users/NKryv/OneDrive/Immagini/fiat_a.jpg"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/:542b731c-ab2c-499e-81bd-1109d00f6389-fiat_a.jpg",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                ":542b731c-ab2c-499e-81bd-1109d00f6389-fiat_a.jpg"
+              ],
+              "variable": [
+                {
+                  "key": "542b731c-ab2c-499e-81bd-1109d00f6389-fiat_a",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "item": [
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role by ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{roleId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"seller\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{roleId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/roles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Permission to Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"delete:ads\",\r\n    \"description\": \"Permission to delete ads\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/permissions/{{permissionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{roleId}}",
+                "permissions",
+                "{{permissionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Permission from Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}/permissions/{{permissionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles",
+                "{{roleId}}",
+                "permissions",
+                "{{permissionId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ads",
+      "item": [
+        {
+          "name": "Create Ad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Renault Arkana\",\n  \"description\": \"SUV full optional, unico proprietario\",\n  \"price\": 32750,\n  \"currency\": \"EUR\",\n  \"year\": 2024,\n  \"mileage\": 15000,\n  \"modelId\": \"be4acef6-8599-4a79-b5e5-b3eee7509e16\"\n}\n"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Paginated All Active Ads",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": " {{access_token}}\n",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ad by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Ad",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n  \"price\": 32725\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adsId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adsId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Ad",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adsId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adsId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Increase Ad View Counter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adsId}}/view",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adsId}}",
+                "view"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Ad Image",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "postman-cloud:///1f07ea05-1678-4010-bc92-fe2293559652"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adId}}/images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adId}}",
+                "images"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Ad Image",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ads/{{adId}}/images/{{imageKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads",
+                "{{adId}}",
+                "images",
+                "{{imageKey}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Active Ads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ads"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "currency",
+      "item": [
+        {
+          "name": "Get Latest Exchange Rates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/currency/rates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currency",
+                "rates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Convert Currency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"USD\",\n  \"to\": \"EUR\",\n  \"amount\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/currency/convert",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currency",
+                "convert"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Manually Update Exchange Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/currency/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "currency",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "cars",
+      "item": [
+        {
+          "name": "Create Car Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Volvo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cars/brands",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "brands"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Brands",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/brands",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "brands"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Brand by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/brands/{{brandId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "brands",
+                "{{brandId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Car Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"XC40\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cars/brands/{{brandId}}/models",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "brands",
+                "{{brandId}}",
+                "models"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Paginated Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/models/paginated?page=1&limit=5&search=bmw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "models",
+                "paginated"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "search",
+                  "value": "bmw"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Model by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/models/{{modelId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "models",
+                "{{modelId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Models by Brand",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/brands/{{brandId}}/models",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "brands",
+                "{{brandId}}",
+                "models"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Permissions",
+      "item": [
+        {
+          "name": "Create Permission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permission by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissions",
+                "{{permissionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permission",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description for permission\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissions",
+                "{{permissionId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Permission",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/{{permissionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "permissions",
+                "{{permissionId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

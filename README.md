@@ -142,17 +142,17 @@ cd autoriaclon
 ```bash
 Copy environment variables:
 cp environments/.env.example .env
-# Change the variables in the .env file as needed: _f...
+# Change the variables in the .env file as needed, deleting: _fakeaccesskey
 ```
 4. Launch Docker containers:
  ```bash
-   docker-compose up -d
+   docker compose up --build
+   npm run seed -- seed
    ```
 
 # Start services:
 npm run start:dev
-docker compose up --build
-npm run seed -- seed
+docker-compose up -d
 
 # Run in background:
 docker compose up -d
